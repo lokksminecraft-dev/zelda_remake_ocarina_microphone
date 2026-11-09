@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ocarina que escuta</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,800&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#eaf0dc;--g1:#fff8d8;--ink:#14281f;--muted:#4f6657;--panel:#fcfbf1;--line:#c4cfae;--accent:#2f7d32;--gold:#8a5f00;--sky:#bcd7c4;--star:transparent;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1815;--g1:#17403a;--ink:#eaf1e3;--muted:#9db3a5;--panel:#122823;--line:#2b4a42;--accent:#8fd16a;--gold:#f0cb62;--sky:#1d3a45;--star:#fff8}}
+:root[data-theme="dark"]{--bg:#0a1815;--g1:#17403a;--ink:#eaf1e3;--muted:#9db3a5;--panel:#122823;--line:#2b4a42;--accent:#8fd16a;--gold:#f0cb62;--sky:#1d3a45;--star:#fff8}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;color:var(--ink);font:16px/1.5 "Nunito Sans",system-ui,sans-serif;min-height:100vh;background:radial-gradient(ellipse 120% 60% at 50% 0,var(--g1),var(--bg) 70%) fixed,var(--bg)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(1.5px 1.5px at 30px 40px,var(--star),transparent),radial-gradient(1px 1px at 120px 90px,var(--star),transparent),radial-gradient(2px 2px at 170px 20px,var(--star),transparent),radial-gradient(1px 1px at 70px 150px,var(--star),transparent);background-size:200px 180px;opacity:.7}
+main{position:relative;max-width:1020px;margin:0 auto;padding:22px 16px 48px}
+h1{font:800 clamp(34px,7vw,62px)/1 Fraunces,Georgia,serif;margin:6px 0 10px;background:linear-gradient(100deg,var(--gold),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.5px}
+h2{font:500 21px Fraunces,Georgia,serif;margin:0 0 12px}
+.lead{color:var(--muted);max-width:58ch;margin:0 0 22px;font-size:17px}
+.grid{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:840px){.grid{grid-template-columns:1.1fr 1fr}}
+.stage{position:relative;border-radius:26px;background:linear-gradient(var(--sky),var(--panel) 88%);border:1px solid var(--line);min-height:410px;overflow:hidden;transition:background 1s;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;box-shadow:0 18px 50px -20px #000a,inset 0 0 0 4px color-mix(in srgb,var(--gold) 14%,transparent)}
+.stage::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;bottom:-60px;background:radial-gradient(circle,color-mix(in srgb,var(--gold) 35%,transparent),transparent 65%);opacity:0;transition:opacity .6s;pointer-events:none}
+.stage.glow::after{opacity:1}
+.stage svg{width:min(260px,72%);height:auto;margin-bottom:6px;position:relative;z-index:1}
+.say{position:absolute;top:16px;left:16px;right:16px;text-align:center;font:500 20px Fraunces,Georgia,serif;min-height:56px;z-index:2}
+.say small{display:block;font:400 14px "Nunito Sans",sans-serif;color:var(--muted);margin-top:2px}
+.fl{position:absolute;bottom:150px;font:800 30px Fraunces,serif;color:var(--gold);animation:up 1.7s ease-out forwards;pointer-events:none;z-index:2;text-shadow:0 0 12px var(--gold)}
+@keyframes up{to{transform:translateY(-200px) rotate(14deg);opacity:0}}
+.hero .mouth{transform-box:fill-box;transform-origin:center}
+.playing .body{animation:bob .55s ease-in-out infinite}
+.playing .mouth{animation:blow .26s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-7px) rotate(-1.5deg)}}
+@keyframes blow{50%{transform:scaleY(2.4)}}
+.panel{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:18px;backdrop-filter:blur(6px)}
+button{font:700 15px "Nunito Sans",sans-serif;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:14px;padding:11px 14px;cursor:pointer;transition:transform .12s,border-color .2s,background .2s}
+button:hover{border-color:var(--accent)}button:active{transform:scale(.97)}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button.main{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--gold)));border:0;color:#08140d;width:100%;padding:14px;font-size:16px}
+button.main.on{background:transparent;border:1.5px solid var(--accent);color:var(--ink)}
+.meter{height:9px;border-radius:6px;background:var(--line);margin:14px 0;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .08s}
+.read{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:14px}
+.read b{color:var(--ink);font:800 24px Fraunces,serif}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;margin-top:10px}
+.chip{border:1px solid var(--line);border-radius:10px;padding:3px 10px;font-size:14px;background:var(--bg)}
+.keys{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.keys button{padding:13px 0;font-size:22px}
+.keys span{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.songs{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.songs button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:13px 15px;background:var(--bg)}
+.songs b{font:500 17px Fraunces,Georgia,serif}
+.songs em{font-style:normal;letter-spacing:4px;color:var(--gold);font-size:16px}
+.songs small{color:var(--muted);font-weight:400}
+.songs button.hit{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 35%,transparent)}
+.err{color:#d2483a;font-size:14px;margin-top:8px}
+.note{color:var(--muted);font-size:13px;margin-top:14px}
+@media(prefers-reduced-motion:reduce){.playing .body,.playing .mouth,.fl{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Ocarina que escuta</h1>
+<p class="lead">Cante, assobie ou toque uma das 12 melodias perto do microfone. Quando o site reconhecer a música, o Herói pega a ocarina e toca.</p>
+
+<div class="grid">
+<section class="stage" id="stage" aria-live="polite">
+  <div class="say" id="say">Ative o microfone e cante uma melodia.<small>Ou toque as notas nos botões.</small></div>
+  <svg class="hero" id="hero" viewBox="0 0 220 280" role="img" aria-label="Herói de gorro verde tocando ocarina">
+    <g class="body">
+      <ellipse cx="110" cy="270" rx="50" ry="7" fill="#000" opacity=".22"/>
+      <rect x="86" y="196" width="18" height="50" rx="8" fill="#e9e2c8"/><rect x="116" y="196" width="18" height="50" rx="8" fill="#e9e2c8"/>
+      <rect x="82" y="238" width="26" height="22" rx="9" fill="#6b4226"/><rect x="112" y="238" width="26" height="22" rx="9" fill="#6b4226"/>
+      <path d="M78 118Q110 102 142 118L152 206Q110 220 68 206Z" fill="#3f8f3a"/>
+      <rect x="72" y="178" width="76" height="11" fill="#6b4226"/><rect x="103" y="176" width="14" height="15" rx="3" fill="#e8c45a"/>
+      <path d="M72 84L48 104L74 100Z" fill="#f0c9a0"/><path d="M148 84L172 104L146 100Z" fill="#f0c9a0"/>
+      <circle cx="110" cy="84" r="36" fill="#f0c9a0"/>
+      <path d="M74 80Q78 58 110 56Q142 58 146 80Q126 68 110 72Q94 68 74 80Z" fill="#d9a441"/>
+      <path d="M70 74Q72 34 112 32Q150 32 160 82Q172 102 180 124Q148 100 147 76Q110 60 70 74Z" fill="#3f8f3a"/>
+      <circle cx="97" cy="90" r="4" fill="#1b3a5c"/><circle cx="123" cy="90" r="4" fill="#1b3a5c"/>
+      <ellipse class="mouth" cx="110" cy="106" rx="4" ry="2" fill="#7a3b2e"/>
+      <path d="M84 126Q66 150 98 150" stroke="#3f8f3a" stroke-width="15" fill="none" stroke-linecap="round"/>
+      <path d="M136 126Q154 150 122 150" stroke="#3f8f3a" stroke-width="15" fill="none" stroke-linecap="round"/>
+      <ellipse cx="110" cy="144" rx="20" ry="11" fill="#4d7fd6"/><rect x="104" y="126" width="12" height="14" rx="4" fill="#3b66b3"/>
+      <circle cx="100" cy="144" r="2.6" fill="#dfe9ff"/><circle cx="110" cy="146" r="2.6" fill="#dfe9ff"/><circle cx="120" cy="144" r="2.6" fill="#dfe9ff"/>
+      <circle cx="98" cy="152" r="7" fill="#f0c9a0"/><circle cx="122" cy="152" r="7" fill="#f0c9a0"/>
+    </g>
+  </svg>
+</section>
+
+<div>
+  <section class="panel">
+    <button class="main" id="mic">Ativar microfone</button>
+    <div class="meter"><i id="lvl"></i></div>
+    <div class="read"><span>Nota ouvida<br><b id="cur">—</b></span><span style="text-align:right">Últimas notas<br><b id="cnt" style="font-size:20px">0</b></span></div>
+    <div class="chips" id="chips"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <h2>Notas manuais</h2>
+    <div class="keys" id="keys"></div>
+    <p class="note">Teclado: A, ↓, →, ←, ↑. A ocarina do jogo tem só estas 5 notas.</p>
+  </section>
+</div>
+</div>
+
+<section class="panel">
+  <h2>Melodias que o Herói conhece</h2>
+  <div class="songs" id="songs"></div>
+  <p class="note">Toque numa melodia para ouvir o Herói tocar. O reconhecimento compara os intervalos entre as notas, então você pode cantar em qualquer tom. Para notas repetidas (como ▶ ▶), separe-as com um “tu”. Os ritmos são aproximados. Protótipo de fã, sem relação com a Nintendo.</p>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const NAMES=['Dó','Dó#','Ré','Ré#','Mi','Fá','Fá#','Sol','Sol#','Lá','Lá#','Si'];
+const nm=m=>NAMES[m%12]+(Math.floor(m/12)-1);
+const N={A:74,D:77,R:81,L:83,U:86},G={74:'A',77:'▼',81:'▶',83:'◀',86:'▲'};
+const S=(n,q,r,b,sky,t)=>({n,p:[...q].map(c=>N[c]),r,b,sky,t});
+const SONGS=[
+ S('Canção de Ninar de Zelda','LURLUR',[2,1,3,2,1,3],.42,'#4a3f7a','Uma luz suave envolve o Herói.'),
+ S('Canção de Epona','ULRULR',[1,1,3,1,1,3],.26,'#7a5530','Um cavalo responde ao chamado.'),
+ S('Canção de Saria','DRLDRL',[1,1,2,1,1,2],.2,'#2e6b3a','A floresta ouve e sorri.'),
+ S('Canção do Sol','RDURDU',[1,1,2,1,1,2],.24,'#e0b04a','O dia nasce de repente.'),
+ S('Canção do Tempo','RADRAD',[3,1,2,3,1,2],.38,'#2f5fa0','O tempo se dobra por um instante.'),
+ S('Canção da Tempestade','ADUADU',[1,1,2,1,1,2],.18,'#2b3140','Nuvens escuras e chuva forte.'),
+ S('Minueto da Floresta','AULRLR',[1,1,1,2,1,3],.24,'#2f7a3f','Folhas giram ao redor do Herói.'),
+ S('Bolero do Fogo','DADARDRD',[1,1,1,1,2,1,1,3],.2,'#a33a1a','O ar fica quente como brasa.'),
+ S('Serenata da Água','ADRRL',[2,1,1,2,3],.3,'#1f6fa8','Gotas ecoam como um lago calmo.'),
+ S('Réquiem do Espírito','ADARDA',[2,1,2,1,1,3],.3,'#b07a2a','Areia dourada gira devagar.'),
+ S('Noturno da Sombra','LRRALRD',[1,1,1,1,1,1,3],.3,'#4a2f66','Sombras dançam ao fundo.'),
+ S('Prelúdio da Luz','URURLU',[1,1,1,1,1,3],.26,'#c9b24a','Um raio de luz desce do alto.')
+];
+let ctx,an,buf,micOn=false,busy=false,hist=[],lvl=0,silent=0,muteUntil=0,seg=[],off=0,pk=0,dw=false;
+const getCtx=()=>ctx||(ctx=new (window.AudioContext||window.webkitAudioContext)());
+const iv=a=>a.slice(1).map((x,i)=>x-a[i]);
+
+function tone(m,when,dur){
+  const c=getCtx(),f=440*2**((m-69)/12),o=c.createOscillator(),h=c.createOscillator(),hg=c.createGain(),g=c.createGain(),l=c.createOscillator(),lg=c.createGain();
+  o.type='sine';o.frequency.value=f;h.type='sine';h.frequency.value=f*2;hg.gain.value=.08;l.frequency.value=5;lg.gain.value=f*.006;l.connect(lg).connect(o.frequency);
+  const at=Math.min(.04,dur/4),rl=Math.min(.08,dur/3);
+  g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(.34,when+at);g.gain.setValueAtTime(.34,when+dur-rl);g.gain.linearRampToValueAtTime(0,when+dur);
+  o.connect(g);h.connect(hg).connect(g);g.connect(c.destination);
+  [o,h,l].forEach(x=>{x.start(when);x.stop(when+dur)});
+}
+function yin(x,sr){
+  let r=0;for(const v of x)r+=v*v;r=Math.sqrt(r/x.length);lvl=r;if(r<.008)return 0;
+  const maxT=Math.floor(sr/80),minT=Math.floor(sr/1400),W=x.length-maxT,c=new Float32Array(maxT+1);let run=0;c[0]=1;
+  for(let t=1;t<=maxT;t++){let s=0;for(let j=0;j<W;j++){const e=x[j]-x[j+t];s+=e*e}run+=s;c[t]=s*t/run}
+  for(let t=minT;t<maxT;t++){if(c[t]<.2){while(t+1<maxT&&c[t+1]<c[t])t++;const a=c[t-1],b=c[t],d=c[t+1],den=a-2*b+d;return sr/(den?t+(a-d)/(2*den):t)}}
+  return 0;
+}
+function match(){
+  let best=null,bs=99;
+  SONGS.forEach(s=>{
+    const n=s.p.length;if(hist.length<n)return;
+    const a=iv(hist.slice(-n)),b=iv(s.p);let tot=0,ok=true;
+    a.forEach((x,i)=>{const d=Math.abs(x-b[i]);tot+=d;if(d>1.6)ok=false});
+    const sc=tot/(n-1);
+    if(ok&&sc<=.9&&sc<bs+.001){bs=sc;best=s}
+  });
+  return best;
+}
+function render(){
+  $('#chips').innerHTML=hist.slice(-10).map(m=>`<span class="chip">${nm(Math.round(m))}</span>`).join('');
+  $('#cnt').textContent=hist.length;
+}
+function pushNote(m){
+  hist.push(m);if(hist.length>16)hist.shift();render();
+  const s=match();if(s){hist=[];render();perform(s)}
+}
+function perform(s){
+  busy=true;const c=getCtx();c.resume();const t0=c.currentTime+.15,st=[];let tot=0;s.r.forEach(r=>{st.push(tot);tot+=r*s.b});
+  s.p.forEach((m,i)=>{
+    tone(m,t0+st[i],s.r[i]*s.b*.92);
+    setTimeout(()=>{const e=document.createElement('span');e.className='fl';e.textContent='♪';e.style.left=(36+Math.random()*28)+'%';$('#stage').appendChild(e);setTimeout(()=>e.remove(),1800)},150+st[i]*1000);
+  });
+  const sg=$('#stage');sg.style.background=`linear-gradient(${s.sky},var(--panel) 88%)`;sg.classList.add('glow');
+  $('#say').innerHTML=`${s.n}<small>${s.t}</small>`;
+  document.querySelectorAll('.songs button').forEach(b=>b.classList.toggle('hit',b.dataset.n===s.n));
+  $('#hero').classList.add('playing');
+  setTimeout(()=>{$('#hero').classList.remove('playing');sg.classList.remove('glow');busy=false;seg=[];off=0;dw=false;pk=0;muteUntil=performance.now()+500},150+tot*1000+300);
+}
+function key(m){
+  const c=getCtx();c.resume();muteUntil=performance.now()+500;tone(m,c.currentTime,.35);
+  $('#cur').textContent=nm(m);if(!busy)pushNote(m);
+}
+function flush(){if(seg.length>=5){const s=[...seg].sort((a,b)=>a-b);pushNote(s[s.length>>1])}seg=[];off=0}
+function loop(){
+  requestAnimationFrame(loop);if(!micOn)return;
+  an.getFloatTimeDomainData(buf);const now=performance.now();
+  if(busy||now<muteUntil){seg=[];off=0;dw=false;pk=0;$('#lvl').style.width='0';return}
+  const f=yin(buf,ctx.sampleRate);$('#lvl').style.width=Math.min(100,lvl*400)+'%';
+  if(f){
+    silent=0;const fm=69+12*Math.log2(f/440),m=Math.round(fm);$('#cur').textContent=`${nm(m)} · ${Math.round(f)} Hz`;
+    if(dw){if(lvl>pk*.75){dw=false;pk=lvl}}
+    if(!dw){
+      const av=seg.length?seg.reduce((a,b)=>a+b)/seg.length:fm;
+      if(seg.length>=4&&lvl<pk*.45){flush();dw=true}
+      else if(seg.length&&Math.abs(fm-av)>.9){if(++off>=3){flush();seg=[fm];pk=lvl}}
+      else{off=0;seg.push(fm);pk=Math.max(lvl,pk*.97)}
+    }
+  }else{
+    if(!silent)silent=now;
+    if(now-silent>90){flush();dw=false;pk=0;$('#cur').textContent='—'}
+    if(now-silent>3000&&hist.length){hist=[];render()}
+  }
+}
+async function startMic(){
+  $('#err').textContent='';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#err').textContent='Este navegador não oferece acesso ao microfone nesta página. Abra o link em uma aba própria, no Chrome ou Safari.';return}
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    window._st=st;const c=getCtx();await c.resume();an=c.createAnalyser();an.fftSize=2048;c.createMediaStreamSource(st).connect(an);buf=new Float32Array(2048);
+    micOn=true;$('#mic').textContent='Microfone ligado (toque para desligar)';$('#mic').classList.add('on');
+    $('#say').innerHTML='Estou ouvindo.<small>Cante as notas de uma melodia.</small>';
+  }catch(e){
+    const emb=window.self!==window.top;
+    $('#err').textContent=(emb?'O microfone foi bloqueado porque a página está dentro de outra janela. Abra o link da página direto em uma aba do navegador e tente de novo. ':'O navegador não liberou o microfone. Clique no cadeado ao lado do endereço, permita o microfone e tente de novo. ')+'(Erro: '+(e&&e.name||'desconhecido')+')';
+  }
+}
+$('#mic').onclick=()=>{
+  if(micOn){micOn=false;$('#mic').textContent='Ativar microfone';$('#mic').classList.remove('on');$('#lvl').style.width='0';$('#cur').textContent='—';
+    if(window._st)window._st.getTracks().forEach(t=>t.stop())}else startMic();
+};
+const K=[[74,'A','Ré 5','a'],[77,'▼','Fá 5','ArrowDown'],[81,'▶','Lá 5','ArrowRight'],[83,'◀','Si 5','ArrowLeft'],[86,'▲','Ré 6','ArrowUp']];
+$('#keys').innerHTML=K.map(k=>`<button data-m="${k[0]}" aria-label="Nota ${k[2]}">${k[1]}<span>${k[2]}</span></button>`).join('');
+$('#keys').onclick=e=>{const b=e.target.closest('button');if(b)key(+b.dataset.m)};
+addEventListener('keydown',e=>{const k=K.find(x=>x[3]===(e.key.length===1?e.key.toLowerCase():e.key));if(k&&!e.repeat){e.preventDefault();key(k[0])}});
+$('#songs').innerHTML=SONGS.map((s,i)=>`<button data-i="${i}" data-n="${s.n}"><b>${s.n}</b><em>${s.p.map(m=>G[m]).join(' ')}</em><small>${s.p.length} notas</small></button>`).join('');
+$('#songs').onclick=e=>{const b=e.target.closest('button');if(b&&!busy)perform(SONGS[+b.dataset.i])};
+loop();
+</script>
+</body>
+</html>
